@@ -1977,45 +1977,41 @@ def generate_ecommerce_pdf(kbi, yearly_orders_profit, figures, top_10_volume_dri
 # EMAIL FUNCTIONALITY
 # =========================================================================
 
-def send_ecommerce_email(pdf_buffer, recipient_email):
+def send_ecommerce_email(pdf_buffer, recipient_email, kbi):
     """
     Send PDF report via email using lazily-loaded credentials.
     """
-    # Get fresh credentials each time
     config = get_email_config()
     
-    # Check if credentials are actually set
+    # Validation
     if not config["SENDER_EMAIL"] or not config["SENDER_PASSWORD"]:
-        st.sidebar.error("❌ Email credentials not configured. Please set secrets or environment variables.")
+        st.sidebar.error("❌ Email credentials not configured. Please add secrets to Streamlit Cloud.")
+        st.sidebar.info("Go to: App Dashboard → Settings → Secrets")
+        return False
+
+    # Validate recipient email format
+    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    if not re.match(email_pattern, recipient_email):
+        st.sidebar.error("❌ Invalid recipient email format.")
         return False
 
     try:
+        # Create message
         msg = MIMEMultipart()
         msg["From"] = config["SENDER_EMAIL"]
         msg["To"] = recipient_email
         msg["Subject"] = f"E-Commerce Performance Report – {datetime.now().strftime('%d %B %Y')}"
 
-        # Extract KPIs
-        total_revenue = kbi.loc[
-            kbi["Metric"] == "Total Revenue (USD)", "Value"
-        ].values[0] if not kbi.empty else 0
-
-        total_customers = kbi.loc[
-            kbi["Metric"] == "Total Customers", "Value"
-        ].values[0] if not kbi.empty else 0
-
-        active_customer_pct = kbi.loc[
-            kbi["Metric"] == "Active Customer Percentage (%)", "Value"
-        ].values[0] if not kbi.empty else 0
-
-        # Email body
+        # Body content
+        total_revenue = kbi.loc[kbi["Metric"] == "Total Revenue (USD)", "Value"].values[0] if not kbi.empty else 0
+        total_customers = kbi.loc[kbi["Metric"] == "Total Customers", "Value"].values[0] if not kbi.empty else 0
+        
         body = f"""
         <p>Hello,</p>
         <p>Please find attached the <strong>E-Commerce Performance Report (PDF)</strong>.</p>
         <ul>
             <li><strong>Total Revenue:</strong> ${float(total_revenue):,.2f}</li>
             <li><strong>Total Customers:</strong> {int(total_customers):,}</li>
-            <li><strong>Active Customers:</strong> {float(active_customer_pct):.2f}%</li>
         </ul>
         <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
         <p>Regards,<br/><strong>Analytics Team</strong></p>
@@ -2030,18 +2026,24 @@ def send_ecommerce_email(pdf_buffer, recipient_email):
         part.add_header("Content-Disposition", 'attachment; filename="Ecommerce_Report.pdf"')
         msg.attach(part)
 
-        # Send email
-        server = smtplib.SMTP(config["SMTP_SERVER"], config["SMTP_PORT"])
-        server.starttls()
-        server.login(config["SENDER_EMAIL"], config["SENDER_PASSWORD"])
-        server.send_message(msg)
-        server.quit()
+        # Send with timeout and better error handling
+        with smtplib.SMTP(config["SMTP_SERVER"], config["SMTP_PORT"], timeout=30) as server:
+            server.starttls()
+            server.login(config["SENDER_EMAIL"], config["SENDER_PASSWORD"])
+            server.send_message(msg)
+        
         return True
         
-    except Exception as e:
-        st.sidebar.error(f"❌ Failed to send email: {str(e)}")
+    except smtplib.SMTPAuthenticationError:
+        st.sidebar.error("❌ Authentication failed. Check email credentials in secrets.")
+        st.sidebar.info("For Gmail: Use an App Password, not your regular password.")
         return False
-
+    except smtplib.SMTPException as e:
+        st.sidebar.error(f"❌ SMTP error: {str(e)}")
+        return False
+    except Exception as e:
+        st.sidebar.error(f"❌ Unexpected error: {str(e)}")
+        return False
 # =========================================================================
 # STREAMLIT UI
 # =========================================================================
@@ -2506,6 +2508,7 @@ def main():
     st.sidebar.header("📧 Email Report")
     recipient_email = st.sidebar.text_input("Recipient Email", placeholder="example@email.com")
 
+    # FIX: Added kbi parameter to the function call
     if st.sidebar.button("Send PDF Report via Email", key="send_pdf_email"):
         if "pdf_buffer" not in st.session_state:
             st.sidebar.warning("⚠️ Please generate the PDF report first.")
@@ -2515,16 +2518,15 @@ def main():
             with st.spinner("Sending email..."):
                 success = send_ecommerce_email(
                     pdf_buffer=st.session_state["pdf_buffer"],
-                    recipient_email=recipient_email
+                    recipient_email=recipient_email,
+                    kbi=kbi  # FIX: Added missing parameter
                 )
                 if success:
                     st.sidebar.success("✅ Email sent successfully!")
-                else:
-                    # Error is already shown in send_ecommerce_email
-                    pass
 
 if __name__ == "__main__":
     main()
+
 
 
 
