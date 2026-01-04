@@ -1958,15 +1958,21 @@ def generate_ecommerce_pdf(kbi, yearly_orders_profit, figures, top_10_volume_dri
 # EMAIL FUNCTIONALITY
 # =========================================================================
 
-def send_ecommerce_email(pdf_buffer, recipient_email, kbi):
-    """Send PDF report via email"""
-    if not EMAIL_CONFIG["SENDER_EMAIL"] or not EMAIL_CONFIG["SENDER_PASSWORD"]:
-        st.sidebar.error("Email credentials not configured. Set environment variables.")
+def send_ecommerce_email(pdf_buffer, recipient_email):
+    """
+    Send PDF report via email using lazily-loaded credentials.
+    """
+    # Get fresh credentials each time
+    config = get_email_config()
+    
+    # Check if credentials are actually set
+    if not config["SENDER_EMAIL"] or not config["SENDER_PASSWORD"]:
+        st.sidebar.error("❌ Email credentials not configured. Please set secrets or environment variables.")
         return False
 
     try:
         msg = MIMEMultipart()
-        msg["From"] = EMAIL_CONFIG["SENDER_EMAIL"]
+        msg["From"] = config["SENDER_EMAIL"]
         msg["To"] = recipient_email
         msg["Subject"] = f"E-Commerce Performance Report – {datetime.now().strftime('%d %B %Y')}"
 
@@ -2006,15 +2012,15 @@ def send_ecommerce_email(pdf_buffer, recipient_email, kbi):
         msg.attach(part)
 
         # Send email
-        server = smtplib.SMTP(EMAIL_CONFIG["SMTP_SERVER"], EMAIL_CONFIG["SMTP_PORT"])
+        server = smtplib.SMTP(config["SMTP_SERVER"], config["SMTP_PORT"])
         server.starttls()
-        server.login(EMAIL_CONFIG["SENDER_EMAIL"], EMAIL_CONFIG["SENDER_PASSWORD"])
+        server.login(config["SENDER_EMAIL"], config["SENDER_PASSWORD"])
         server.send_message(msg)
         server.quit()
         return True
         
     except Exception as e:
-        st.sidebar.error(f"Failed to send email: {str(e)}")
+        st.sidebar.error(f"❌ Failed to send email: {str(e)}")
         return False
 
 # =========================================================================
@@ -2481,23 +2487,24 @@ def main():
     st.sidebar.header("📧 Email Report")
     recipient_email = st.sidebar.text_input("Recipient Email", placeholder="example@email.com")
 
-    if st.sidebar.button("Send PDF Report via Email", key="send_pdf_email"):
-        if "pdf_buffer" not in st.session_state:
-            st.sidebar.warning("⚠️ Please generate the PDF report first.")
-        elif not recipient_email:
-            st.sidebar.warning("⚠️ Please enter a recipient email.")
-        else:
-            with st.spinner("Sending email..."):
-                success = send_ecommerce_email(
-                    pdf_buffer=st.session_state["pdf_buffer"],
-                    recipient_email=recipient_email,
-                    kbi=kbi
-                )
-                if success:
-                    st.sidebar.success("Email sent successfully ✅")
-                else:
-                    st.sidebar.error("Failed to send email. Check credentials.")
+if st.sidebar.button("Send PDF Report via Email", key="send_pdf_email"):
+    if "pdf_buffer" not in st.session_state:
+        st.sidebar.warning("⚠️ Please generate the PDF report first.")
+    elif not recipient_email:
+        st.sidebar.warning("⚠️ Please enter a recipient email.")
+    else:
+        with st.spinner("Sending email..."):
+            success = send_ecommerce_email(
+                pdf_buffer=st.session_state["pdf_buffer"],
+                recipient_email=recipient_email
+            )
+            if success:
+                st.sidebar.success("✅ Email sent successfully!")
+            else:
+                # Error is already shown in send_ecommerce_email
+                pass
 
 if __name__ == "__main__":
     main()
+
 
