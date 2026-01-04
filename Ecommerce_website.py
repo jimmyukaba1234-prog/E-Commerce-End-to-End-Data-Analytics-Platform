@@ -2574,14 +2574,14 @@ def main():
             with st.spinner("Sending email..."):
                 success = send_ecommerce_email(
                     pdf_buffer=st.session_state["pdf_buffer"],
-                    recipient_email=recipient_email,
-                    kbi=kbi  # FIX: Added missing parameter
+                    recipient_email=recipient_email
                 )
                 if success:
                     st.sidebar.success("✅ Email sent successfully!")
 
 if __name__ == "__main__":
     main()
+
 
 
 
