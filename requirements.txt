@@ -21,3 +21,4 @@ premailer
 requests
 streamlit-option-menu
 statsmodels
+kaleido
