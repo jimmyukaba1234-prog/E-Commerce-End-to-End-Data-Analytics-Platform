@@ -43,6 +43,7 @@ import string
 from datetime import timedelta
 import warnings
 from tqdm import tqdm
+from reportlab.platypus import Image as RLImage
 
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", None)
@@ -1811,14 +1812,22 @@ def get_feature_importance(churn_model, ltv_model, churn_features, ltv_features)
 # =========================================================================
 
 def fig_to_image(fig, width=450):
-    """Convert Plotly figure to ReportLab Image"""
+    """Convert Plotly figure to ReportLab Image with fallback"""
     if fig is None:
         return None
-        
-    img_buffer = BytesIO()
-    fig.write_image(img_buffer, format="png", scale=2)
-    img_buffer.seek(0)
-    return Image(img_buffer, width=width, height=width * 0.6)
+    
+    try:
+        from reportlab.platypus import Image as RLImage  # Import here
+        img_buffer = BytesIO()
+        fig.write_image(img_buffer, format="png", scale=2)
+        img_buffer.seek(0)
+        return RLImage(img_buffer, width=width, height=width * 0.6)
+    except Exception as e:
+        if "chrome" in str(e).lower() or "kaleido" in str(e).lower():
+            st.sidebar.warning("⚠️ PDF charts skipped (browser not available)")
+        else:
+            st.sidebar.warning(f"⚠️ Chart error: {str(e)[:30]}...")
+        return None
 
 @st.cache_data
 def generate_ecommerce_pdf(kbi, yearly_orders_profit, figures, top_10_volume_drivers, 
@@ -2491,3 +2500,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
