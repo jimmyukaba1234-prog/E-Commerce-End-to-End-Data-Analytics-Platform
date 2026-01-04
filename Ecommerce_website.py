@@ -50,12 +50,6 @@ pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", 50)
 pd.set_option("display.float_format", lambda x: f"{x:.2f}")
 
-# =========================================================================
-# CONFIGURATION
-# =========================================================================
-GOOGLE_DRIVE_SHARE_URL = "https://drive.google.com/file/d/1BlVZUbcUUVuYTZXYHfy0kBaN8Y83VGN8/view"
-LOCAL_DB_PATH = "ecommerce_raw.db"
-
 # Email Configuration (Set these as environment variables for security)
 import os
 
@@ -80,6 +74,14 @@ def get_email_config():
             "SENDER_EMAIL": os.getenv("SENDER_EMAIL", ""),
             "SENDER_PASSWORD": os.getenv("SENDER_PASSWORD", ""),
         }
+# After defining get_email_config()
+print("✅ get_email_config defined:", callable(get_email_config))
+
+# =========================================================================
+# CONFIGURATION
+# =========================================================================
+GOOGLE_DRIVE_SHARE_URL = "https://drive.google.com/file/d/1BlVZUbcUUVuYTZXYHfy0kBaN8Y83VGN8/view"
+LOCAL_DB_PATH = "ecommerce_raw.db"
 
 # =========================================================================
 # ROBUST DATABASE DOWNLOAD
@@ -2523,6 +2525,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
