@@ -57,12 +57,29 @@ GOOGLE_DRIVE_SHARE_URL = "https://drive.google.com/file/d/1BlVZUbcUUVuYTZXYHfy0k
 LOCAL_DB_PATH = "ecommerce_raw.db"
 
 # Email Configuration (Set these as environment variables for security)
-EMAIL_CONFIG = {
-    "SMTP_SERVER": os.getenv("SMTP_SERVER", "smtp.gmail.com"),
-    "SMTP_PORT": int(os.getenv("SMTP_PORT", "587")),
-    "SENDER_EMAIL": os.getenv("SENDER_EMAIL", ""),
-    "SENDER_PASSWORD": os.getenv("SENDER_PASSWORD", ""),
-}
+import os
+
+def get_email_config():
+    """
+    Get email credentials from Streamlit secrets or environment variables.
+    Loads lazily to avoid initialization errors.
+    """
+    # Try Streamlit secrets first (for Streamlit Cloud)
+    try:
+        return {
+            "SMTP_SERVER": st.secrets.get("SMTP_SERVER", "smtp.gmail.com"),
+            "SMTP_PORT": int(st.secrets.get("SMTP_PORT", "587")),
+            "SENDER_EMAIL": st.secrets.get("SENDER_EMAIL", ""),
+            "SENDER_PASSWORD": st.secrets.get("SENDER_PASSWORD", ""),
+        }
+    except FileNotFoundError:
+        # Fallback to environment variables for local development
+        return {
+            "SMTP_SERVER": os.getenv("SMTP_SERVER", "smtp.gmail.com"),
+            "SMTP_PORT": int(os.getenv("SMTP_PORT", "587")),
+            "SENDER_EMAIL": os.getenv("SENDER_EMAIL", ""),
+            "SENDER_PASSWORD": os.getenv("SENDER_PASSWORD", ""),
+        }
 
 # =========================================================================
 # ROBUST DATABASE DOWNLOAD
@@ -2506,6 +2523,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
