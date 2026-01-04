@@ -43,6 +43,7 @@ import string
 from datetime import timedelta
 import warnings
 from tqdm import tqdm
+from reportlab.lib.utils import Image
 
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", None)
@@ -53,27 +54,40 @@ pd.set_option("display.float_format", lambda x: f"{x:.2f}")
 # At the top of your file (module level)
 import os
 
+# =========================================================================
+# EMAIL CONFIGURATION - UPDATED FOR STREAMLIT CLOUD
+# =========================================================================
+
 def get_email_config():
     """
-    Get email credentials from Streamlit secrets or environment variables.
-    Loads lazily to avoid initialization errors.
+    Get email credentials from Streamlit secrets with proper error handling.
     """
-    # Try Streamlit secrets first (for Streamlit Cloud)
     try:
-        return {
-            "SMTP_SERVER": st.secrets.get("SMTP_SERVER", "smtp.gmail.com"),
-            "SMTP_PORT": int(st.secrets.get("SMTP_PORT", "587")),
-            "SENDER_EMAIL": st.secrets.get("SENDER_EMAIL", ""),
-            "SENDER_PASSWORD": st.secrets.get("SENDER_PASSWORD", ""),
+        # Try Streamlit secrets first
+        secrets = st.secrets
+        
+        # Check for email credentials in secrets
+        sender_email = secrets.get("email", {}).get("sender_email") or secrets.get("SENDER_EMAIL")
+        sender_password = secrets.get("email", {}).get("sender_password") or secrets.get("SENDER_PASSWORD")
+        
+        # Default configuration (Gmail with port 465 for SSL)
+        config = {
+            "SMTP_SERVER": secrets.get("email", {}).get("smtp_server", "smtp.gmail.com"),
+            "SMTP_PORT": int(secrets.get("email", {}).get("smtp_port", "465")),  # Use 465 for SSL
+            "SENDER_EMAIL": sender_email,
+            "SENDER_PASSWORD": sender_password,
         }
-    except FileNotFoundError:
-        # Fallback to environment variables for local development
-        return {
-            "SMTP_SERVER": os.getenv("SMTP_SERVER", "smtp.gmail.com"),
-            "SMTP_PORT": int(os.getenv("SMTP_PORT", "587")),
-            "SENDER_EMAIL": os.getenv("SENDER_EMAIL", ""),
-            "SENDER_PASSWORD": os.getenv("SENDER_PASSWORD", ""),
-        }
+        
+        # Validate config
+        if not config["SENDER_EMAIL"] or not config["SENDER_PASSWORD"]:
+            st.sidebar.warning("⚠️ Email credentials not found in secrets")
+            return None
+            
+        return config
+        
+    except Exception as e:
+        st.sidebar.warning(f"⚠️ Could not load email config: {str(e)}")
+        return None
 
 # =========================================================================
 # CONFIGURATION
@@ -1974,72 +1988,117 @@ def generate_ecommerce_pdf(kbi, yearly_orders_profit, figures, top_10_volume_dri
 # EMAIL FUNCTIONALITY
 # =========================================================================
 
-def send_ecommerce_email(pdf_buffer, recipient_email, kbi):
+def send_ecommerce_email(pdf_buffer, recipient_email):
     """
-    Send PDF report via email using lazily-loaded credentials.
+    Send PDF report via email with robust error handling for Streamlit Cloud.
     """
+    # Get fresh credentials
     config = get_email_config()
     
-    # Validation
-    if not config["SENDER_EMAIL"] or not config["SENDER_PASSWORD"]:
-        st.sidebar.error("❌ Email credentials not configured. Please add secrets to Streamlit Cloud.")
-        st.sidebar.info("Go to: App Dashboard → Settings → Secrets")
+    if not config:
+        st.sidebar.error("❌ Email configuration not available.")
+        st.sidebar.info("""
+        To enable email functionality:
+        1. Go to your Streamlit Cloud app settings
+        2. Add these secrets in the 'Secrets' section:
+        
+        
+        [email]
+        sender_email = "your_email@gmail.com"
+        sender_password = "your_app_password"  # Use App Password, not regular password
+        smtp_server = "smtp.gmail.com"
+        smtp_port = "465"
+        
+        
+        Note: For Gmail, you need to:
+        - Enable 2-factor authentication
+        - Generate an App Password (not your regular password)
+        - Allow less secure apps OR use OAuth2 (App Password is recommended)
+        """)
         return False
-
-    # Validate recipient email format
-    email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-    if not re.match(email_pattern, recipient_email):
-        st.sidebar.error("❌ Invalid recipient email format.")
+    
+    # Validate recipient email
+    if not recipient_email or "@" not in recipient_email:
+        st.sidebar.error("❌ Please enter a valid recipient email address")
         return False
-
+    
     try:
         # Create message
         msg = MIMEMultipart()
         msg["From"] = config["SENDER_EMAIL"]
         msg["To"] = recipient_email
-        msg["Subject"] = f"E-Commerce Performance Report – {datetime.now().strftime('%d %B %Y')}"
-
-        # Body content
-        total_revenue = kbi.loc[kbi["Metric"] == "Total Revenue (USD)", "Value"].values[0] if not kbi.empty else 0
-        total_customers = kbi.loc[kbi["Metric"] == "Total Customers", "Value"].values[0] if not kbi.empty else 0
+        msg["Subject"] = f"E-Commerce Analytics Report – {datetime.now().strftime('%Y-%m-%d')}"
         
+        # Email body
         body = f"""
-        <p>Hello,</p>
-        <p>Please find attached the <strong>E-Commerce Performance Report (PDF)</strong>.</p>
-        <ul>
-            <li><strong>Total Revenue:</strong> ${float(total_revenue):,.2f}</li>
-            <li><strong>Total Customers:</strong> {int(total_customers):,}</li>
-        </ul>
-        <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M')}</p>
-        <p>Regards,<br/><strong>Analytics Team</strong></p>
+        <html>
+        <body>
+            <p>Hello,</p>
+            <p>Please find attached the E-Commerce Analytics Report.</p>
+            <p><strong>Report Details:</strong></p>
+            <ul>
+                <li>Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M')}</li>
+                <li>Includes: KPI metrics, revenue analysis, churn predictions, and LTV forecasts</li>
+            </ul>
+            <p>This report was automatically generated by the E-Commerce Analytics Platform.</p>
+            <p>Best regards,<br>
+            <strong>Analytics Team</strong></p>
+        </body>
+        </html>
         """
+        
         msg.attach(MIMEText(body, "html"))
-
+        
         # Attach PDF
         pdf_buffer.seek(0)
         part = MIMEBase("application", "pdf")
         part.set_payload(pdf_buffer.read())
         encoders.encode_base64(part)
-        part.add_header("Content-Disposition", 'attachment; filename="Ecommerce_Report.pdf"')
+        part.add_header(
+            "Content-Disposition",
+            f'attachment; filename="Ecommerce_Report_{datetime.now().strftime("%Y%m%d")}.pdf"'
+        )
         msg.attach(part)
-
-        # Send with timeout and better error handling
-        with smtplib.SMTP(config["SMTP_SERVER"], config["SMTP_PORT"], timeout=30) as server:
-            server.starttls()
-            server.login(config["SENDER_EMAIL"], config["SENDER_PASSWORD"])
-            server.send_message(msg)
         
+        # Send email with appropriate settings
+        if config["SMTP_PORT"] == 465:
+            # SSL connection
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(config["SMTP_SERVER"], config["SMTP_PORT"], context=context) as server:
+                server.login(config["SENDER_EMAIL"], config["SENDER_PASSWORD"])
+                server.send_message(msg)
+        else:
+            # TLS connection
+            with smtplib.SMTP(config["SMTP_SERVER"], config["SMTP_PORT"]) as server:
+                server.starttls()
+                server.login(config["SENDER_EMAIL"], config["SENDER_PASSWORD"])
+                server.send_message(msg)
+        
+        st.sidebar.success(f"✅ Report sent to {recipient_email}")
         return True
         
     except smtplib.SMTPAuthenticationError:
-        st.sidebar.error("❌ Authentication failed. Check email credentials in secrets.")
-        st.sidebar.info("For Gmail: Use an App Password, not your regular password.")
+        st.sidebar.error("❌ Authentication failed. Please check your email credentials.")
+        st.sidebar.info("""
+        Common solutions:
+        1. For Gmail: Use an App Password (not your regular password)
+        2. Enable 2-factor authentication in your Google account
+        3. Generate App Password: Google Account → Security → App Passwords
+        """)
         return False
-    except smtplib.SMTPException as e:
-        st.sidebar.error(f"❌ SMTP error: {str(e)}")
+        
+    except smtplib.SMTPConnectError:
+        st.sidebar.error("❌ Could not connect to SMTP server.")
+        st.sidebar.info("""
+        Streamlit Cloud may block certain ports. Try:
+        1. Use port 465 (SSL) instead of 587 (TLS)
+        2. Consider using a transactional email service (SendGrid, Mailgun)
+        3. Or use your company's SMTP server
+        """)
         return False
+        
     except Exception as e:
-        st.sidebar.error(f"❌ Unexpected error: {str(e)}")
+        st.sidebar.error(f"❌ Failed to send email: {str(e)}")
         return False
 # =========================================================================
 # STREAMLIT UI
@@ -2523,6 +2582,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
