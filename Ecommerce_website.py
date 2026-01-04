@@ -43,14 +43,14 @@ import string
 from datetime import timedelta
 import warnings
 from tqdm import tqdm
-from reportlab.platypus import Image as RLImage
 
 warnings.filterwarnings("ignore")
 pd.set_option("display.max_columns", None)
 pd.set_option("display.max_rows", 50)
 pd.set_option("display.float_format", lambda x: f"{x:.2f}")
 
-# Email Configuration (Set these as environment variables for security)
+
+# At the top of your file (module level)
 import os
 
 def get_email_config():
@@ -74,8 +74,6 @@ def get_email_config():
             "SENDER_EMAIL": os.getenv("SENDER_EMAIL", ""),
             "SENDER_PASSWORD": os.getenv("SENDER_PASSWORD", ""),
         }
-# After defining get_email_config()
-print("✅ get_email_config defined:", callable(get_email_config))
 
 # =========================================================================
 # CONFIGURATION
@@ -128,15 +126,15 @@ def download_and_validate_database(url: str, local_path: str) -> str:
             st.error("The URL is not providing the raw file.")
             st.markdown("### 🔧 Troubleshooting Steps:")
             st.markdown("""
-            1. **Check Sharing Settings:**
+            1. *Check Sharing Settings:*
                - Right-click file in Google Drive → Share
                - Change to 'Anyone with the link' (not 'Restricted')
                
-            2. **Verify URL Format:**
-               - Your share URL should be: `https://drive.google.com/file/d/.../view`
+            2. *Verify URL Format:*
+               - Your share URL should be: https://drive.google.com/file/d/.../view
                - The app will auto-convert it to direct download
                
-            3. **Test the URL in a browser:**
+            3. *Test the URL in a browser:*
                - Use the direct URL in a private/incognito browser
                - It should start downloading immediately (not show a preview)
             """)
@@ -265,7 +263,6 @@ def run_etl_pipeline(db_path: str, save_to_sqlite: bool = False):
         print("=" * 80)
 
         cleaned_tables = {}
-
         # ----------------------------- CUSTOMERS TABLE -----------------------------
         if "customers" in dataframes:
             print("Cleaning customers table")
@@ -2526,6 +2523,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
