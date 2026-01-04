@@ -2487,24 +2487,25 @@ def main():
     st.sidebar.header("📧 Email Report")
     recipient_email = st.sidebar.text_input("Recipient Email", placeholder="example@email.com")
 
-if st.sidebar.button("Send PDF Report via Email", key="send_pdf_email"):
-    if "pdf_buffer" not in st.session_state:
-        st.sidebar.warning("⚠️ Please generate the PDF report first.")
-    elif not recipient_email:
-        st.sidebar.warning("⚠️ Please enter a recipient email.")
-    else:
-        with st.spinner("Sending email..."):
-            success = send_ecommerce_email(
-                pdf_buffer=st.session_state["pdf_buffer"],
-                recipient_email=recipient_email
-            )
-            if success:
-                st.sidebar.success("✅ Email sent successfully!")
-            else:
-                # Error is already shown in send_ecommerce_email
-                pass
+    if st.sidebar.button("Send PDF Report via Email", key="send_pdf_email"):
+        if "pdf_buffer" not in st.session_state:
+            st.sidebar.warning("⚠️ Please generate the PDF report first.")
+        elif not recipient_email:
+            st.sidebar.warning("⚠️ Please enter a recipient email.")
+        else:
+            with st.spinner("Sending email..."):
+                success = send_ecommerce_email(
+                    pdf_buffer=st.session_state["pdf_buffer"],
+                    recipient_email=recipient_email
+                )
+                if success:
+                    st.sidebar.success("✅ Email sent successfully!")
+                else:
+                    # Error is already shown in send_ecommerce_email
+                    pass
 
 if __name__ == "__main__":
     main()
+
 
 
