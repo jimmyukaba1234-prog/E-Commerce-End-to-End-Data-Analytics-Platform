@@ -4,6 +4,27 @@ This repository contains a full end-to-end e-commerce data analytics platform de
 
 The solution is built on large-scale historical e-commerce data spanning multiple domains, including customers (50,500 rows × 24 columns), orders (101,000 rows × 24 columns), products (10,300 rows × 30 columns), and reviews (50,400 rows × 20 columns). A relational database was first designed and populated, after which an automated ETL pipeline was developed to extract, clean, transform, and integrate the data into analytics-ready tables.
 
+📦 Sample Database (Upload via Web App)
+
+A pre-built SQLite database is provided so users can immediately test the full functionality of the web application without running any ETL scripts locally.
+
+Download the database here:
+👉 https://drive.google.com/file/d/1BlVZUbcUUVuYTZXYHfy0kBaN8Y83VGN8/view?usp=sharing
+
+How to use the database
+
+Download the Ecommerce.db file from the link above
+
+Launch the web application
+
+Navigate to the “Upload Database” section
+
+Upload the downloaded Ecommerce.db file
+
+The dashboards, analytics, models, and reports will load automatically
+
+⚠️ Note: The database is not required to be placed in the project directory. All interactions are handled through the web application’s database upload interface.
+
 Following data preparation, comprehensive exploratory analysis, business intelligence dashboards, and visualizations were created to answer key business questions around customer retention, churn patterns, regional performance, product profitability, fulfillment efficiency, payment failures, and long-term financial trends. Insights reveal a “leaky bucket” retention pattern, declining sales and profit over time, operational bottlenecks in delivery and payments, and a heavy concentration of revenue among a small group of high-value customers.
 
 To move beyond descriptive analytics, predictive models were built for customer churn and customer lifetime value (LTV). The churn model leverages RFM features—especially recency—to identify high-risk customers early, enabling targeted re-engagement strategies. The LTV model highlights how future revenue is driven by a small number of high-value customers with infrequent but high-ticket purchases, supporting smarter prioritization and resource allocation.
