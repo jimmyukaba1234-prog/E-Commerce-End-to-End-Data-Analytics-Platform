@@ -32,7 +32,7 @@ To move beyond descriptive analytics, predictive models were built for customer 
 The project also includes automated reporting, generating stakeholder-ready PDF reports, and a web application that allows users to interact with insights in real time. Overall, this repository demonstrates a complete analytics lifecycle from database design and data engineering to modeling, reporting, and deployment aimed at driving data-informed decision-making, improving retention, and supporting sustainable e-commerce growth.
 
 
-roject Role & Contributions
+Project Role & Contributions
 
 Role: Team Lead | Data Engineer | Data Analyst
 
