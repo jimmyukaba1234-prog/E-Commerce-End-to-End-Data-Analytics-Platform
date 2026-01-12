@@ -33,27 +33,26 @@ The project also includes automated reporting, generating stakeholder-ready PDF 
 
 
 Project Role & Contributions
-
 Role: Team Lead | Data Engineer | Data Analyst
 
 This project was completed by a five-person team, where I served as the team lead. Beyond coordinating the team and ensuring deadlines were met, I was deeply involved in the core technical implementation of the platform.
 
-My Key Contributions
+My Key Contributions:
 
-Led project planning, provided technical direction, and ensured timely delivery under a tight deadline.
+1. Led project planning, provided technical direction, and ensured timely delivery under a tight deadline.
 
-Designed and implemented the end-to-end ETL pipeline, handling data extraction, cleaning, transformation, and integration into analytics-ready tables.
+2. Designed and implemented the end-to-end ETL pipeline, handling data extraction, cleaning, transformation, and integration into analytics-ready tables.
 
-Built the web application that enables users to upload the database, interact with dashboards, and explore insights in real time.
+3. Built the web application that enables users to upload the database, interact with dashboards, and explore insights in real time.
 
-Developed automation workflows, including automated data processing and generation of stakeholder-ready PDF reports.
+4. Developed automation workflows, including automated data processing and generation of stakeholder-ready PDF reports.
 
-Created and integrated interactive dashboards and visualizations to surface insights around churn, revenue, operational performance, and customer behavior.
+5. Created and integrated interactive dashboards and visualizations to surface insights around churn, revenue, operational performance, and customer behavior.
 
-Supported model development by preparing features and analytics outputs used for churn and LTV prediction.
+6. Supported model development by preparing features and analytics outputs used for churn and LTV prediction.
 
 Team Collaboration
 
-Collaborated with team members on exploratory analysis, business insights, and model interpretation.
+7. Collaborated with team members on exploratory analysis, business insights, and model interpretation.
 
-Incorporated team feedback during development while making firm technical decisions when alignment was required to meet deadlines.
+8. Incorporated team feedback during development while making firm technical decisions when alignment was required to meet deadlines.
