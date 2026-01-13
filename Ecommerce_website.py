@@ -1,6 +1,63 @@
-# =========================================================================
+"""
+E-Commerce Analytics & Machine Learning Dashboard
+=================================================
+
+This Streamlit web application provides an end-to-end analytics platform for
+an E-commerce database. It integrates a full ETL (Extract, Transform, Load)
+pipeline with interactive analytics, visualizations, and machine learning–ready
+datasets to support data-driven business decisions.
+
+Key Features
+------------
+- Automated database download and caching from an external source
+- Robust ETL pipeline for cleaning and standardizing E-commerce data
+  (customers, orders, products, and reviews)
+- Handling of missing values, outliers, inconsistent formats, and data types
+- Feature engineering for churn analysis, loyalty metrics, revenue insights,
+  and customer behavior tracking
+- Interactive visualizations using Plotly (churn, revenue, loyalty, volume drivers)
+- Business KPIs (KBI) computation for executive-level reporting
+- Support for saving cleaned datasets back to SQLite
+- Modular analytics functions designed for reuse and extension
+- Streamlit-based UI for exploration and reporting
+
+Technologies Used
+-----------------
+- Python
+- Streamlit
+- Pandas, NumPy
+- SQLite
+- Plotly & Matplotlib
+- Scikit-learn
+- ReportLab (PDF generation)
+- OpenPyXL (Excel export)
+
+Project Structure
+-----------------
+- Database download and caching
+- ETL pipeline with table-specific cleaning logic
+- Analytics and visualization modules
+- Optional machine learning integrations
+- Streamlit application interface
+
+Intended Use
+------------
+This project is designed for:
+- Data analytics portfolios
+- Business intelligence demonstrations
+- Customer behavior and churn analysis
+- Revenue and performance monitoring
+- End-to-end data engineering practice
+
+Author
+------
+Jimmy Ukaba
+
+"""
+
+
+
 # CONFIGURATION & IMPORTS
-# =========================================================================
 import streamlit as st
 st.set_page_config(
     page_title="🛒 E-Commerce Analytics, Churn & LTV Intelligence",
@@ -2581,6 +2638,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
