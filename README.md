@@ -9,7 +9,7 @@ Sample Database (Upload via Web App)
 A pre-built SQLite database is provided so users can immediately test the full functionality of the web application without running any ETL scripts locally.
 
 Download the database here:
-👉 https://drive.google.com/file/d/1BlVZUbcUUVuYTZXYHfy0kBaN8Y83VGN8/view?usp=sharing
+https://drive.google.com/file/d/1BlVZUbcUUVuYTZXYHfy0kBaN8Y83VGN8/view?usp=sharing
 
 How to use the database
 
@@ -27,7 +27,7 @@ The dashboards, analytics, models, and reports will load automatically
 
 Following data preparation, comprehensive exploratory analysis, business intelligence dashboards, and visualizations were created to answer key business questions around customer retention, churn patterns, regional performance, product profitability, fulfillment efficiency, payment failures, and long-term financial trends. Insights reveal a “leaky bucket” retention pattern, declining sales and profit over time, operational bottlenecks in delivery and payments, and a heavy concentration of revenue among a small group of high-value customers.
 
-To move beyond descriptive analytics, predictive models were built for customer churn and customer lifetime value (LTV). The churn model leverages RFM features—especially recency—to identify high-risk customers early, enabling targeted re-engagement strategies. The LTV model highlights how future revenue is driven by a small number of high-value customers with infrequent but high-ticket purchases, supporting smarter prioritization and resource allocation.
+To move beyond descriptive analytics, predictive models were built for customer churn and customer lifetime value (LTV). The churn model leverages RFM features—especially recency to identify high-risk customers early, enabling targeted re-engagement strategies. The LTV model highlights how future revenue is driven by a small number of high-value customers with infrequent but high-ticket purchases, supporting smarter prioritization and resource allocation.
 
 The project also includes automated reporting, generating stakeholder-ready PDF reports, and a web application that allows users to interact with insights in real time. Overall, this repository demonstrates a complete analytics lifecycle from database design and data engineering to modeling, reporting, and deployment aimed at driving data-informed decision-making, improving retention, and supporting sustainable e-commerce growth.
 
