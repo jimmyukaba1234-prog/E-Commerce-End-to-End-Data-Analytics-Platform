@@ -548,7 +548,7 @@ def run_etl_pipeline(db_path: str, save_to_sqlite: bool = False):
             date_columns = ["order_date", "estimated_delivery", "actual_delivery"]
             for col in date_columns:
                 if col in df1.columns:
-                    df1[col] = pd.to_datetime(df1[col], errors="coerce", infer_datetime_format=True)
+                    df1[col] = pd.to_datetime(df1[col], errors="coerce")
 
             df1["order_date_date"] = df1["order_date"].dt.date
             df1["order_date_time"] = df1["order_date"].dt.time
